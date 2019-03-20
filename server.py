@@ -45,22 +45,24 @@ def ShellCtrl(socket,addr):
 			SelectClient()
 			return
 		if com == '!q':
-			exit(0)
+			quitThread = True
+			return
 		socket.send(com.encode('utf-8'))
 		data = socket.recv(1024)
 		print(data.decode('utf-8'))
 
-def ClientHandle():
-	while True:
-		if len(clientList) > 0:
-			SelectClient()
-			ShellCtrl(curClient[0],curClient[1])
 def main():
 	s = Init()
 	t = threading.Thread(target=WaitConnect,args=(s,))
 	t.start()
-	t1= threading.Thread(target=ClientHandle)
-	t1.start()
+	while True:
+		if len(clientList) > 0:
+			if quitThread == True:
+				break
+			SelectClient()
+			t1 = threading.Thread(target=ShellCtrl,args=(curClient[0],curClient[1],))
+			t1.start()
+	s.close()
 
 if __name__ == '__main__':
 	main()
